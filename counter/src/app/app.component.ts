@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {interval, Subscription} from "rxjs";
 
 @Component({
@@ -29,5 +29,13 @@ export class AppComponent {
     this.currentValue = this.count;
     this.countSub.unsubscribe();
     this.isRunning = false;
+  }
+
+  public customValueChanged(event: Event): void {
+    const newValue = +event.target['value'];
+    if (!this.isRunning) return;
+    this.count = newValue;
+    this.onPause();
+    this.onStart();
   }
 }

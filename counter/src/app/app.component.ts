@@ -11,10 +11,11 @@ export class AppComponent {
   private countSub: Subscription;
   private isRunning = false;
   private currentValue = 0;
+  private countDirection = 1;
 
   public onStart(): void {
     if (this.isRunning) return;
-    this.countSub = interval(800).subscribe(val => this.count = val + this.currentValue);
+    this.countSub = interval(800).subscribe(val => this.count = this.countDirection * val + this.currentValue);
     this.isRunning = true;
   }
 
@@ -35,6 +36,12 @@ export class AppComponent {
     const newValue = +event.target['value'];
     if (!this.isRunning) return;
     this.count = newValue;
+    this.onPause();
+    this.onStart();
+  }
+
+  public setCountDirection(direction: number): void {
+    this.countDirection = direction;
     this.onPause();
     this.onStart();
   }

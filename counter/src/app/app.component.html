@@ -4,6 +4,9 @@
   <button mat-stroked-button class="btn" color="warn" (click)="onReset()">Reset</button>
   <button mat-stroked-button class="btn" color="" (click)="onPause()">Pause</button>
 
+  <button mat-stroked-button class="btn" color="" (click)="setCountDirection(1)">Count Up</button>
+  <button mat-stroked-button class="btn" color="" (click)="setCountDirection(-1)">Count Down</button>
+
   <input type="number" (focusout)="customValueChanged($event)">
 </section>
 

@@ -1,5 +1,9 @@
 import {Component} from '@angular/core';
-import {interval, Subscription} from "rxjs";
+
+enum CountDirection {
+  'Inc' = 1,
+  'Dec' = -1,
+}
 
 @Component({
   selector: 'app-root',
@@ -8,37 +12,39 @@ import {interval, Subscription} from "rxjs";
 })
 export class AppComponent {
   public count = 0;
-  private countSub: Subscription;
-  private isRunning = false;
-  private initialValue = 0;
-  private countDirection = 1;
-  private tickSpeedValue = 600;
-  private countDiffValue = 1;
+  public initialValue = 0;
+  public tickSpeedValue = 600;
+  public countDiffValue = 1;
+  public CountDirection = CountDirection;
+  public countDirection: CountDirection = CountDirection.Inc;
+  public isRunning = false;
   private initialValueIsUpdated = false;
+  private interval: number;
 
   public onStart(): void {
-    this.countSub = interval(this.tickSpeedValue).subscribe(() => this.count = this.count + this.countDirection * this.countDiffValue);
+    if (this.isRunning) return;
     this.isRunning = true;
+    this.interval = setInterval(() => this.count = this.count + this.countDirection * this.countDiffValue, this.tickSpeedValue);
   }
 
   public onReset(): void {
-    this.countSub.unsubscribe();
-    this.count = 0;
     this.isRunning = false;
+    this.count = 0;
     this.initialValue = 0;
+    clearInterval(this.interval);
   }
 
   public onPause(): void {
-    this.countSub.unsubscribe();
     this.isRunning = false;
+    clearInterval(this.interval);
   }
 
-  public customValueChanged(event: Event): void {
+  public customValueChanged(): void {
     this.initialValueIsUpdated = true;
     this.restart();
   }
 
-  public setCountDirection(direction: number): void {
+  public setCountDirection(direction: CountDirection): void {
     this.countDirection = direction;
     this.restart();
   }
@@ -55,7 +61,7 @@ export class AppComponent {
   * Private Helpers
   * */
   private restart(): void {
-    // Return if already running.
+    // Return if not running.
     if (!this.isRunning) return;
 
     // Set initial value if updated

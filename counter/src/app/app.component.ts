@@ -10,12 +10,14 @@ export class AppComponent {
   public count = 0;
   private countSub: Subscription;
   private isRunning = false;
-  private currentValue = 0;
+  private initialValue = 0;
   private countDirection = 1;
+  private tickSpeedValue = 600;
+  private countDiffValue = 1;
+  private initialValueIsUpdated = false;
 
   public onStart(): void {
-    if (this.isRunning) return;
-    this.countSub = interval(800).subscribe(val => this.count = this.countDirection * val + this.currentValue);
+    this.countSub = interval(this.tickSpeedValue).subscribe(() => this.count = this.count + this.countDirection * this.countDiffValue);
     this.isRunning = true;
   }
 
@@ -23,25 +25,46 @@ export class AppComponent {
     this.countSub.unsubscribe();
     this.count = 0;
     this.isRunning = false;
-    this.currentValue = 0;
+    this.initialValue = 0;
   }
 
   public onPause(): void {
-    this.currentValue = this.count;
     this.countSub.unsubscribe();
     this.isRunning = false;
   }
 
   public customValueChanged(event: Event): void {
-    const newValue = +event.target['value'];
-    if (!this.isRunning) return;
-    this.count = newValue;
-    this.onPause();
-    this.onStart();
+    this.initialValueIsUpdated = true;
+    this.restart();
   }
 
   public setCountDirection(direction: number): void {
     this.countDirection = direction;
+    this.restart();
+  }
+
+  public onTickSpeedValueChanged(): void {
+    this.restart();
+  }
+
+  public onCountDiffValueChanged(): void {
+    this.restart();
+  }
+
+  /*
+  * Private Helpers
+  * */
+  private restart(): void {
+    // Return if already running.
+    if (!this.isRunning) return;
+
+    // Set initial value if updated
+    if (this.initialValueIsUpdated) {
+      this.count = this.initialValue;
+      this.initialValueIsUpdated = false;
+    }
+
+    // Stop and Start the process.
     this.onPause();
     this.onStart();
   }

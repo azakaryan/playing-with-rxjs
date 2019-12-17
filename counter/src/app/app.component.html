@@ -6,12 +6,22 @@
 
   <button mat-stroked-button class="btn" color="" (click)="setCountDirection(1)">Count Up</button>
   <button mat-stroked-button class="btn" color="" (click)="setCountDirection(-1)">Count Down</button>
+</section>
 
-  <input type="number" (focusout)="customValueChanged($event)">
+<section class="inputs">
+  <mat-form-field class="example-full-width">
+    <input matInput placeholder="Value" type="number" [(ngModel)]="initialValue" (focusout)="customValueChanged($event)">
+  </mat-form-field> <br>
+  <mat-form-field class="example-full-width">
+    <input placeholder="Tick Speed" [(ngModel)]="tickSpeedValue" matInput type="number" (ngModelChange)="onTickSpeedValueChanged()">
+  </mat-form-field> <br>
+  <mat-form-field>
+    <input placeholder="Count diff" [(ngModel)]="countDiffValue" matInput type="number" (ngModelChange)="onCountDiffValueChanged()">
+  </mat-form-field>
 </section>
 
 
 <hr>
 <section class="results">
-  <label class="label-count">Counter:</label><span class="count">{{count}}</span>
+  <label class="label-count">Counter</label><div class="count">{{count}}</div>
 </section>

@@ -73,6 +73,8 @@ export class RxjsCqrsBasedCounterComponent implements OnInit, OnDestroy {
   public count: number;
   public tickSpeedValue: number;
   public countDiffValue: number;
+
+  // TODO implement
   public inputSetTo: number;
 
 
@@ -92,14 +94,8 @@ export class RxjsCqrsBasedCounterComponent implements OnInit, OnDestroy {
     * */
     const count$ = counterState$.pipe(pluck<CounterState, number>(ConterStateKeys.Count));
     const isTicking$ = counterState$.pipe(pluck(ConterStateKeys.IsTicking), distinctUntilChanged<boolean>());
-
     const tickSpeed$ = counterState$.pipe(pluck(ConterStateKeys.TickSpeed), distinctUntilChanged<number>());
     const countDiff$ = counterState$.pipe(pluck(ConterStateKeys.CountDiff), distinctUntilChanged<number>());
-
-    // const counterUpdateTrigger$ = isTicking$
-    //   .pipe(
-    //     switchMap((isTicking: boolean) => isTicking ? timer(0, initialConterState.tickSpeed) : NEVER)
-    //   );
 
     const counterUpdateTrigger$ = combineLatest([isTicking$, tickSpeed$])
       .pipe(

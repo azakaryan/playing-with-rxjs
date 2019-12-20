@@ -15,10 +15,10 @@
     <input #inputSetData matInput placeholder="Value" [(ngModel)]="inputSetTo" type="number">
   </mat-form-field> <br>
   <mat-form-field class="example-full-width">
-    <input #inputTickSpeed placeholder="Tick Speed" matInput type="number">
+    <input #inputTickSpeed placeholder="Tick Speed" [(ngModel)]="tickSpeedValue" matInput type="number">
   </mat-form-field> <br>
   <mat-form-field>
-    <input #inputCountDiff placeholder="Count diff" matInput type="number">
+    <input #inputCountDiff placeholder="Count diff" [(ngModel)]="countDiffValue" matInput type="number">
   </mat-form-field>
 </section>
 

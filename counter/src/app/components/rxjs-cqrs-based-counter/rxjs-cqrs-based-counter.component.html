@@ -1,1 +1,29 @@
-<p>rxjs-cqrs-based-counter works!</p>
+<h3>CQRS Based Counter</h3>
+<section class="actions">
+
+  <button #btnStart mat-stroked-button class="btn" color="primary">Start</button>
+  <button #btnReset mat-stroked-button class="btn" color="warn">Reset</button>
+  <button #btnStop mat-stroked-button class="btn">Pause</button>
+
+  <button #btnUp mat-stroked-button class="btn">Count Up</button>
+  <button #btnDown mat-stroked-button class="btn">Count Down</button>
+
+</section>
+
+<section class="inputs">
+  <mat-form-field class="example-full-width">
+    <input #inputSetData matInput placeholder="Value" type="number">
+  </mat-form-field> <br>
+  <mat-form-field class="example-full-width">
+    <input #inputTickSpeed placeholder="Tick Speed" matInput type="number">
+  </mat-form-field> <br>
+  <mat-form-field>
+    <input #inputCountDiff placeholder="Count diff" matInput type="number">
+  </mat-form-field>
+</section>
+
+
+<hr>
+<section class="results">
+  <label class="label-count">Counter</label><div class="count">{{counter}}</div>
+</section>

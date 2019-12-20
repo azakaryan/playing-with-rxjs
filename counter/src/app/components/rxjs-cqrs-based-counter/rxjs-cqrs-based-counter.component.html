@@ -12,7 +12,7 @@
 
 <section class="inputs">
   <mat-form-field class="example-full-width">
-    <input #inputSetData matInput placeholder="Value" type="number">
+    <input #inputSetData matInput placeholder="Value" [(ngModel)]="inputSetTo" type="number">
   </mat-form-field> <br>
   <mat-form-field class="example-full-width">
     <input #inputTickSpeed placeholder="Tick Speed" matInput type="number">

@@ -71,6 +71,10 @@ export class RxjsCqrsBasedCounterComponent implements OnInit, OnDestroy {
   private programmaticCommandSubject: Subject<CounterCommand> = new Subject<CounterCommand>();
 
   public count: number;
+  public tickSpeedValue: number;
+  public countDiffValue: number;
+  public inputSetTo: number;
+
 
   constructor() { }
 
@@ -89,7 +93,10 @@ export class RxjsCqrsBasedCounterComponent implements OnInit, OnDestroy {
     const count$ = counterState$.pipe(pluck<CounterState, number>(ConterStateKeys.Count));
     const isTicking$ = counterState$.pipe(pluck(ConterStateKeys.IsTicking), distinctUntilChanged<boolean>());
 
-    const intervalTick$ = isTicking$
+    const tickSpeed$ = counterState$.pipe(pluck(ConterStateKeys.TickSpeed), distinctUntilChanged<number>());
+    const countDiff$ = counterState$.pipe(pluck(ConterStateKeys.CountDiff), distinctUntilChanged<number>());
+
+    const counterUpdateTrigger$ = isTicking$
       .pipe(
         switchMap((isTicking: boolean) => isTicking ? timer(0, initialConterState.tickSpeed) : NEVER)
       );
@@ -97,21 +104,22 @@ export class RxjsCqrsBasedCounterComponent implements OnInit, OnDestroy {
     /*
     * UI INPUTS
     * */
-    const renderCountChange$ = count$
-    .pipe(
-      tap(n => this.count = n)
-    );
+    const renderCountChange$ = count$.pipe(tap(n => this.count = n));
+
+    const renderTickSpeedChange$ = tickSpeed$.pipe(tap((value: number) => this.tickSpeedValue = value));
+    const renderCountDiffChange$ = countDiff$.pipe(tap((value: number) => this.countDiffValue = value));
+    const renderSetToChange$ = this.btnReset$.pipe(tap(() => this.inputSetTo = 0));
 
     /*
     * UI OUTPUTS
     * */
-    const commandFromTick$ = intervalTick$
-    .pipe(
-      withLatestFrom(count$, (source, count) => count),
-      tap((count: number) => {
-        this.updateCounterStateProgrammatically({count: ++count});
-      })
-    );
+    const commandFromTick$ = counterUpdateTrigger$
+      .pipe(
+        withLatestFrom(count$, (source, count) => count),
+        tap((count: number) => {
+          this.updateCounterStateProgrammatically({count: ++count});
+        })
+      );
 
     /*
     * SUBSCRIPTION
@@ -119,6 +127,9 @@ export class RxjsCqrsBasedCounterComponent implements OnInit, OnDestroy {
     merge(
       // Input side effect
       renderCountChange$,
+      renderTickSpeedChange$,
+      renderCountDiffChange$,
+      renderSetToChange$,
       // Outputs side effect
       commandFromTick$,
     )

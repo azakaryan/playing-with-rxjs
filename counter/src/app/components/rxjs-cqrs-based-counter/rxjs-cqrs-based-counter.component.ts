@@ -105,7 +105,6 @@ export class RxjsCqrsBasedCounterComponent implements OnInit, OnDestroy {
     * UI INPUTS
     * */
     const renderCountChange$ = count$.pipe(tap(n => this.count = n));
-
     const renderTickSpeedChange$ = tickSpeed$.pipe(tap((value: number) => this.tickSpeedValue = value));
     const renderCountDiffChange$ = countDiff$.pipe(tap((value: number) => this.countDiffValue = value));
     const renderSetToChange$ = this.btnReset$.pipe(tap(() => this.inputSetTo = 0));
@@ -113,13 +112,27 @@ export class RxjsCqrsBasedCounterComponent implements OnInit, OnDestroy {
     /*
     * UI OUTPUTS
     * */
+    // const commandFromTick$ = counterUpdateTrigger$
+    //   .pipe(
+    //     withLatestFrom(count$, (source, count) => count),
+    //     tap((count: number) => {
+    //       this.updateCounterStateProgrammatically({count: ++count});
+    //     })
+    //   );
+
     const commandFromTick$ = counterUpdateTrigger$
       .pipe(
-        withLatestFrom(count$, (source, count) => count),
-        tap((count: number) => {
-          this.updateCounterStateProgrammatically({count: ++count});
+        withLatestFrom(counterState$, (_, counterState) => ({
+          [ConterStateKeys.Count]: counterState.count,
+          [ConterStateKeys.CountUp]: counterState.countUp
+        })),
+        tap((obj: {count: number, countUp: boolean}) => {
+          const {count, countUp} = obj;
+          const direction = countUp ? 1 : -1;
+          return this.updateCounterStateProgrammatically({count: count + 1 * direction})
         })
       );
+
 
     /*
     * SUBSCRIPTION

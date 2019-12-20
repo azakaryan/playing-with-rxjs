@@ -1,0 +1,47 @@
+<h3>Actions Initial Counter</h3>
+<section class="actions">
+
+  <button mat-stroked-button [disabled]="isRunning" class="btn" color="primary" (click)="onStart()">Start</button>
+  <button mat-stroked-button class="btn" color="warn" (click)="onReset()">Reset</button>
+  <button mat-stroked-button [disabled]="!isRunning" class="btn" color="" (click)="onPause()">Pause</button>
+
+  <button
+    mat-stroked-button
+    class="btn"
+    [disabled]="countDirection === CountDirection.Inc"
+    color=""
+    (click)="setCountDirection(CountDirection.Inc)"
+  >
+    Count Up
+  </button>
+
+  <button
+    mat-stroked-button
+    class="btn"
+    [disabled]="countDirection === CountDirection.Dec"
+    color=""
+    (click)="setCountDirection(CountDirection.Dec)"
+  >
+    Count Down
+  </button>
+
+</section>
+
+<section class="inputs">
+  <mat-form-field class="example-full-width">
+    <input matInput placeholder="Value" type="number" [(ngModel)]="initialValue" (focusout)="customValueChanged()">
+  </mat-form-field> <br>
+  <mat-form-field class="example-full-width">
+    <input placeholder="Tick Speed" [(ngModel)]="tickSpeedValue" matInput type="number" (ngModelChange)="onTickSpeedValueChanged()">
+  </mat-form-field> <br>
+  <mat-form-field>
+    <input placeholder="Count diff" [(ngModel)]="countDiffValue" matInput type="number" (ngModelChange)="onCountDiffValueChanged()">
+  </mat-form-field>
+</section>
+
+
+<hr>
+<section class="results">
+  <label class="label-count">Counter</label><div class="count">{{count}}</div>
+</section>
+

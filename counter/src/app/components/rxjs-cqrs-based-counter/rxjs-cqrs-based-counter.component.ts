@@ -11,7 +11,7 @@ import {
   tap,
   withLatestFrom
 } from "rxjs/operators";
-import {fromEvent, merge, NEVER, Observable, Subject, timer} from "rxjs";
+import {combineLatest, fromEvent, merge, NEVER, Observable, Subject, timer} from "rxjs";
 
 interface CounterState {
   isTicking: boolean,
@@ -96,9 +96,14 @@ export class RxjsCqrsBasedCounterComponent implements OnInit, OnDestroy {
     const tickSpeed$ = counterState$.pipe(pluck(ConterStateKeys.TickSpeed), distinctUntilChanged<number>());
     const countDiff$ = counterState$.pipe(pluck(ConterStateKeys.CountDiff), distinctUntilChanged<number>());
 
-    const counterUpdateTrigger$ = isTicking$
+    // const counterUpdateTrigger$ = isTicking$
+    //   .pipe(
+    //     switchMap((isTicking: boolean) => isTicking ? timer(0, initialConterState.tickSpeed) : NEVER)
+    //   );
+
+    const counterUpdateTrigger$ = combineLatest([isTicking$, tickSpeed$])
       .pipe(
-        switchMap((isTicking: boolean) => isTicking ? timer(0, initialConterState.tickSpeed) : NEVER)
+        switchMap(([isTicking, tickSpeed]) => isTicking ? timer(0, tickSpeed) : NEVER)
       );
 
     /*
@@ -112,14 +117,6 @@ export class RxjsCqrsBasedCounterComponent implements OnInit, OnDestroy {
     /*
     * UI OUTPUTS
     * */
-    // const commandFromTick$ = counterUpdateTrigger$
-    //   .pipe(
-    //     withLatestFrom(count$, (source, count) => count),
-    //     tap((count: number) => {
-    //       this.updateCounterStateProgrammatically({count: ++count});
-    //     })
-    //   );
-
     const commandFromTick$ = counterUpdateTrigger$
       .pipe(
         withLatestFrom(counterState$, (_, counterState) => ({

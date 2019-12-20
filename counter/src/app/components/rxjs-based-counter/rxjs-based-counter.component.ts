@@ -1,6 +1,6 @@
 import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {fromEvent, merge, NEVER, Observable, Subscription, timer} from "rxjs";
-import {mapTo, switchMap} from "rxjs/operators";
+import {mapTo, scan, switchMap} from "rxjs/operators";
 
 @Component({
   selector: 'app-rxjs-based-counter',
@@ -27,7 +27,9 @@ export class RxjsBasedCounterComponent implements OnInit, OnDestroy {
         switchMap((isTicking: boolean) =>
           isTicking
             ? timer(0, this.tickSpeed)
-            : NEVER)
+            : NEVER
+        ),
+        scan((acc, curr) => acc + curr, 0),
       );
 
     this.counterSubscription = this.counter$

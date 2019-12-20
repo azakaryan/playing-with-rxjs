@@ -1,6 +1,17 @@
 import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {map, mapTo, scan, shareReplay, startWith } from "rxjs/operators";
-import {fromEvent, merge, Observable } from "rxjs";
+import {
+  distinctUntilChanged,
+  map,
+  mapTo,
+  pluck,
+  scan,
+  shareReplay,
+  startWith,
+  switchMap,
+  tap,
+  withLatestFrom
+} from "rxjs/operators";
+import {fromEvent, merge, NEVER, Observable, Subject, timer} from "rxjs";
 
 interface CounterState {
   isTicking: boolean,
@@ -10,6 +21,14 @@ interface CounterState {
   countDiff: number,
 }
 
+enum ConterStateKeys {
+  IsTicking = 'isTicking',
+  Count = 'count',
+  CountUp = 'countUp',
+  TickSpeed = 'tickSpeed',
+  CountDiff = 'countDiff',
+}
+
 const initialConterState: CounterState = {
   isTicking: false,
   count: 0,
@@ -17,6 +36,13 @@ const initialConterState: CounterState = {
   tickSpeed: 600,
   countDiff:1
 };
+
+type CounterCommand =
+  { isTicking: boolean } |
+  { count: number } |
+  { countUp: boolean } |
+  { tickSpeed: number } |
+  { countDiff:number};
 
 @Component({
   selector: 'app-rxjs-cqrs-based-counter',
@@ -42,25 +68,61 @@ export class RxjsCqrsBasedCounterComponent implements OnInit, OnDestroy {
   private btnReset$: Observable<any>;
   private inputTickSpeed$: Observable<any>;
   private inputCountDiff$: Observable<any>;
+  private programmaticCommandSubject: Subject<CounterCommand> = new Subject<CounterCommand>();
 
-  private counterCommands$: Observable<any>;
-  private counterState$: Observable<CounterState>;
+  public count: number;
 
   constructor() { }
 
   ngOnInit() {
     this.bindEvents();
-    this.init();
 
-    this.counterState$ = this.counterCommands$
+    /*
+    * STATE OBSERVABLES
+    * */
+    const counterCommands$ = this.initCounterCommands();
+    const counterState$ = this.initCounterState(counterCommands$);
+
+    /*
+    * INTERMEDIATE OBSERVABLES
+    * */
+    const count$ = counterState$.pipe(pluck<CounterState, number>(ConterStateKeys.Count));
+    const isTicking$ = counterState$.pipe(pluck(ConterStateKeys.IsTicking), distinctUntilChanged<boolean>());
+
+    const intervalTick$ = isTicking$
+      .pipe(
+        switchMap((isTicking: boolean) => isTicking ? timer(0, initialConterState.tickSpeed) : NEVER)
+      );
+
+    /*
+    * UI INPUTS
+    * */
+    const renderCountChange$ = count$
     .pipe(
-      startWith(initialConterState),
-      scan( (counterState: CounterState, command): CounterState => ( {...counterState, ...command} ) ),
-      shareReplay(1)
+      tap(n => this.count = n)
     );
 
-    this.counterState$
-      .subscribe(console.log);
+    /*
+    * UI OUTPUTS
+    * */
+    const commandFromTick$ = intervalTick$
+    .pipe(
+      withLatestFrom(count$, (source, count) => count),
+      tap((count: number) => {
+        this.updateCounterStateProgrammatically({count: ++count});
+      })
+    );
+
+    /*
+    * SUBSCRIPTION
+    * */
+    merge(
+      // Input side effect
+      renderCountChange$,
+      // Outputs side effect
+      commandFromTick$,
+    )
+    .subscribe();
   }
 
   ngOnDestroy(): void {
@@ -70,6 +132,19 @@ export class RxjsCqrsBasedCounterComponent implements OnInit, OnDestroy {
   /*
   * Private Helpers
   * */
+  private initCounterState(counterCommands$: Observable<any>): Observable<CounterState> {
+    return counterCommands$
+    .pipe(
+      startWith(initialConterState),
+      scan( (counterState: CounterState, command): CounterState => ( {...counterState, ...command} ) ),
+      shareReplay(1)
+    );
+  }
+
+  private updateCounterStateProgrammatically(command: CounterCommand): void {
+    this.programmaticCommandSubject.next(command)
+  }
+
   private bindEvents(): void {
     this.btnStart$ = fromEvent(this.btnStart.nativeElement, 'click');
     this.btnStop$ = fromEvent(this.btnStop.nativeElement, 'click');
@@ -82,8 +157,8 @@ export class RxjsCqrsBasedCounterComponent implements OnInit, OnDestroy {
     this.inputCountDiff$ = this.getInputObservable(this.inputCountDiff).pipe(startWith(initialConterState.countDiff));
   }
 
-  private init(): void {
-    this.counterCommands$ = merge(
+  private initCounterCommands(): Observable<any> {
+    return merge(
       this.btnStart$.pipe(mapTo({isTicking: true})),
       this.btnStop$.pipe(mapTo({isTicking: false})),
       this.btnUp$.pipe(mapTo({countUp: true})),
@@ -91,7 +166,8 @@ export class RxjsCqrsBasedCounterComponent implements OnInit, OnDestroy {
       this.btnReset$.pipe(mapTo({...initialConterState})),
       this.btnSetTo$.pipe(map((value) => ({count: value}))),
       this.inputTickSpeed$.pipe(map ( (value) => ({tickSpeed: value}))),
-      this.inputCountDiff$.pipe(map ( (value) => ({countDiff: value})))
+      this.inputCountDiff$.pipe(map ( (value) => ({countDiff: value}))),
+      this.programmaticCommandSubject,
     );
   }
 

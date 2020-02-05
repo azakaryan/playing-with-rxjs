@@ -4,10 +4,13 @@
   <button #startBtn mat-stroked-button class="btn" color="primary">Start</button>
   <button #stopBtn mat-stroked-button class="btn" color="">Pause</button>
 
+  <mat-form-field class="example-full-width">
+    <input #inputSetData matInput placeholder="Value" [(ngModel)]="inputSetTo" type="number">
+  </mat-form-field> <br>
 </section>
 
 
 <hr>
 <section class="results">
-  <label class="label-count">Counter</label><div class="count">{{counter}}</div>
+  <label class="label-count">Counter</label><div class="count">{{counter$ | async}}</div>
 </section>

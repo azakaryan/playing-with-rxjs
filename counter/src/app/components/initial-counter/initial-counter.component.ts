@@ -19,12 +19,14 @@ export class InitialCounterComponent {
   public countDirection: CountDirection = CountDirection.Inc;
   public isRunning = false;
   private initialValueIsUpdated = false;
-  private interval: number;
+  private interval: any;
 
   public onStart(): void {
     if (this.isRunning) return;
     this.isRunning = true;
-    this.interval = setInterval(() => this.count = this.count + this.countDirection * this.countDiffValue, this.tickSpeedValue);
+    this.interval = setInterval(() => {
+      this.count = this.count + this.countDirection * this.countDiffValue;
+    }, this.tickSpeedValue);
   }
 
   public onReset(): void {

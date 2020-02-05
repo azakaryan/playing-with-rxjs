@@ -12,18 +12,18 @@
 
 <section class="inputs">
   <mat-form-field class="example-full-width">
-    <input #inputSetData matInput placeholder="Value" [(ngModel)]="inputSetTo" type="number">
+    <input #inputSetData placeholder="Value" [(ngModel)]="inputSetTo" matInput type="number">
   </mat-form-field> <br>
   <mat-form-field class="example-full-width">
-    <input #inputTickSpeed placeholder="Tick Speed" [(ngModel)]="tickSpeedValue" matInput type="number">
+    <input #inputTickSpeed placeholder="Tick Speed" [ngModel]="tickSpeedValue$ | async" matInput type="number">
   </mat-form-field> <br>
   <mat-form-field>
-    <input #inputCountDiff placeholder="Count diff" [(ngModel)]="countDiffValue" matInput type="number">
+    <input #inputCountDiff placeholder="Count diff" [ngModel]="countDiffValue$ | async" matInput type="number">
   </mat-form-field>
 </section>
 
 
 <hr>
 <section class="results">
-  <label class="label-count">Counter</label><div class="count">{{count}}</div>
+  <label class="label-count">Counter</label><div class="count">{{count$ | async}}</div>
 </section>
